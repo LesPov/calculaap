@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=League+Spartan:wght@400;500;700&family=Poppins:ital,wght@0,600;1,500;1,600&display=swap"
+        rel="stylesheet">
+    <title>Calculadora</title>
+</head>
+
+<body>
+    <div id="app1l">
+        <form name="calculator">
+            <div id="calculation-history">
+                <!-- Historial de cálculos -->
+                <div class="calculation-entry">
+                    <div class="calculation-operation"></div>
+                    <div class="calculation-result"></div>
+                </div>
+            </div>
+            <input type="textfield" name="ans" value="" autocomplete="off" readonly>
+            <div id="result-container">
+                <div id="possible-result"></div>
+            </div>
+
+
+            <div class="buttons">
+
+                <input type="reset" value="C" class="operation-button">
+                <button type="button" class="operation-button" id="backspace-button">
+                    <i class="fa-solid fa-delete-left"></i>
+                </button>
+                <input type="button" value="%" class="operation-button">
+                <input type="button" value="/" class="operation-button">
+                <br>
+                <input type="button" value="7" class="number-button">
+                <input type="button" value="8" class="number-button">
+                <input type="button" value="9" class="number-button">
+                <input type="button" value="*" class="operation-button">
+                <br>
+                <input type="button" value="4" class="number-button">
+                <input type="button" value="5" class="number-button">
+                <input type="button" value="6" class="number-button">
+                <input type="button" value="-" class="operation-button">
+                <br>
+                <input type="button" value="1" class="number-button">
+                <input type="button" value="2" class="number-button">
+                <input type="button" value="3" class="number-button">
+                <input type="button" value="+" class="operation-button">
+                <br>
+                <button type="button" class="operation-button" id="voice-button">
+                    <i class="fa-solid fa-microphone"></i>
+                </button>
+                <input type="button" value="0" class="number-button">
+                <input type="button" value="." class="number-button">
+                <input type="button" value="=" class="operation-buttonequals">
+
+            </div>
+        </form>
+    </div>
+</body>
+<script src="https://kit.fontawesome.com/a394d1a37f.js" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.1/annyang.min.js"></script>
+<script src="https://apis.google.com/js/api.js"></script>
+
+<script type="module" src="js/main.js"></script>
+
+
+</html>
