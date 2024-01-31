@@ -1,8 +1,7 @@
-// js/calculator/index.js
-
 // Importar las funciones y módulos necesarios
 import * as operations from './operations.js';
 
+// Objeto calculadora que maneja la lógica de la calculadora
 const calculator = {
     // Elementos del DOM
     ansInput: null,
@@ -20,8 +19,7 @@ const calculator = {
         this.attachEventHandlers();
     },
 
-    
-
+    // Asigna manejadores de eventos a los botones
     attachEventHandlers: function () {
         const buttons = document.querySelectorAll('.buttons input[type="button"]');
         buttons.forEach((button) => {
@@ -32,58 +30,61 @@ const calculator = {
         });
     },
 
-
-    // Manejo de clics en botones
+    // Maneja clics en botones
     handleButtonClick: function (value) {
-        switch (value) {
-            case '=':
-                this.evaluateExpression();
-                break;
-            case 'C':
-                this.clearCalculator();
-                break;
-            // Puedes agregar más casos según las operaciones que necesites
-            default:
-                this.updateExpression(value);
-                break;
-        }
+        const buttonActions = {
+            '=': () => this.evaluateExpression(),
+            'C': () => this.clearCalculator(),
+            // Agrega más casos según las operaciones que necesites
+            default: () => this.updateExpression(value)
+        };
+
+        const action = buttonActions[value] || buttonActions.default;
+        action();
     },
 
-    // Actualización de la expresión en la calculadora
-
-
+    // Actualiza la expresión en la calculadora según el botón presionado
     updateExpression: function (value) {
         const currentExpression = this.ansInput.value;
 
-        // Verificar si la expresión está vacía y el nuevo valor es un operador
-        if (currentExpression === '' && /[\+\-\*\/]/.test(value)) {
-            // Permitir que el primer número sea negativo
-            this.ansInput.value = value;
-            return;
+        if (this.shouldReplaceOperator(currentExpression, value)) {
+            this.replaceLastOperator(currentExpression, value);
+        } else if (this.shouldAllowNegativeNumber(currentExpression, value)) {
+            this.allowNegativeNumber(value);
+        } else {
+            this.appendValueToExpression(value);
         }
+    },
 
-        // Verificar si ya hay un operador al final de la expresión
-        const lastCharIsOperator = /[\+\-\*\/]$/.test(currentExpression);
-
-        // Verificar si el nuevo valor es un operador
+    // Verifica si se debe reemplazar el último operador en la expresión
+    shouldReplaceOperator: function (expression, value) {
+        const lastCharIsOperator = /[\+\-\*\/]$/.test(expression);
         const newValueIsOperator = /[\+\-\*\/]/.test(value);
+        return lastCharIsOperator && newValueIsOperator;
+    },
 
-        // Verificar si hay dos operadores seguidos y el usuario seleccionó un nuevo operador
-        if (lastCharIsOperator && newValueIsOperator) {
-            // Reemplazar el operador anterior con el nuevo operador
-            this.ansInput.value = currentExpression.slice(0, -1) + value;
-            return;
-        }
+    // Reemplaza el último operador en la expresión
+    replaceLastOperator: function (expression, value) {
+        this.ansInput.value = expression.slice(0, -1) + value;
+    },
 
-        // Agregar el nuevo valor a la expresión
+    // Verifica si se debe permitir un número negativo al inicio de la expresión
+    shouldAllowNegativeNumber: function (expression, value) {
+        return expression === '' && /[\+\-\*\/]/.test(value);
+    },
+
+    // Permite un número negativo al inicio de la expresión
+    allowNegativeNumber: function (value) {
+        this.ansInput.value = value;
+    },
+
+    // Agrega el valor del botón a la expresión
+    appendValueToExpression: function (value) {
         this.ansInput.value += value;
     },
 
-
-
-    // Evaluación de la expresión
-     // Evaluación de la expresión
-     evaluateExpression: function () {
+    // Evalúa la expresión y muestra el resultado en la calculadora
+    evaluateExpression: function () {
         const expression = this.ansInput.value;
     
         // Manejar el caso especial de números negativos al inicio
@@ -101,9 +102,7 @@ const calculator = {
         }
     },
 
-    
-   
-    // Mostrar la expresión y el resultado en el historial
+    // Muestra la expresión y el resultado en el historial de cálculos
     showInHistory: function (expression, result) {
         const historyEntry = document.createElement('div');
         historyEntry.classList.add('calculation-entry');
@@ -125,18 +124,17 @@ const calculator = {
         this.calculationHistory.insertBefore(historyEntry, this.calculationHistory.firstChild);
     },
 
-
-    // Limpiar la calculadora
+    // Limpia la calculadora
     clearCalculator: function () {
         this.ansInput.value = '';
         // Puedes limpiar otros elementos, como el historial de cálculos, si es necesario
     },
 
-    // Mostrar el resultado
+    // Muestra el resultado en la calculadora
     displayResult: function (result) {
         this.ansInput.value = result;
     },
-
 };
 
+// Exporta el objeto calculadora como módulo
 export default calculator;
