@@ -33,27 +33,28 @@ export function evaluate(expression) {
     for (let i = 1; i < tokens.length; i += 2) {
         const operator = tokens[i];
         const operand = parseFloat(tokens[i + 1]);
-
-        switch (operator) {
-            case '+':
-                result = add(result, operand);
-                break;
-            case '-':
-                result = subtract(result, operand);
-                break;
-            case '*':
-                result = multiply(result, operand);
-                break;
-            case '/':
-                result = divide(result, operand);
-                break;
-            default:
-                throw new Error('Operador no reconocido: ' + operator);
-        }
+        result = operate(result, operator, operand);
     }
 
     return result;
 }
+
+// Realizar la operación correspondiente
+function operate(leftOperand, operator, rightOperand) {
+    const operations = {
+        '+': add,
+        '-': subtract,
+        '*': multiply,
+        '/': divide
+    };
+
+    if (!operations[operator]) {
+        throw new Error('Operador no reconocido: ' + operator);
+    }
+
+    return operations[operator](leftOperand, rightOperand);
+}
+
 
 // Validación de expresión
 function isValidExpression(expression) {

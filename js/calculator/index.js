@@ -20,7 +20,7 @@ const calculator = {
         this.attachEventHandlers();
     },
 
-    // ...
+    
 
     attachEventHandlers: function () {
         const buttons = document.querySelectorAll('.buttons input[type="button"]');
@@ -32,7 +32,6 @@ const calculator = {
         });
     },
 
-    // ...
 
     // Manejo de clics en botones
     handleButtonClick: function (value) {
@@ -56,6 +55,13 @@ const calculator = {
     updateExpression: function (value) {
         const currentExpression = this.ansInput.value;
 
+        // Verificar si la expresión está vacía y el nuevo valor es un operador
+        if (currentExpression === '' && /[\+\-\*\/]/.test(value)) {
+            // Permitir que el primer número sea negativo
+            this.ansInput.value = value;
+            return;
+        }
+
         // Verificar si ya hay un operador al final de la expresión
         const lastCharIsOperator = /[\+\-\*\/]$/.test(currentExpression);
 
@@ -78,13 +84,18 @@ const calculator = {
     // Evaluación de la expresión
     evaluateExpression: function () {
         const expression = this.ansInput.value;
+    
+        // Manejar el caso especial de números negativos al inicio
+        const adjustedExpression = expression.replace(/^-/, '0-');
+    
         try {
-            const result = operations.evaluate(expression);
+            const result = operations.evaluate(adjustedExpression);
             this.displayResult(result);
         } catch (error) {
             console.error('Error al evaluar la expresión:', error.message);
         }
     },
+    
 
     // Limpiar la calculadora
     clearCalculator: function () {
