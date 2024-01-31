@@ -56,25 +56,27 @@ function operate(leftOperand, operator, rightOperand) {
 }
 
 
-// Validación de expresión
+// Validación de expresión// Validación de expresión
 function isValidExpression(expression) {
-    // Expresión regular que permite dígitos, operadores y espacios en blanco
-    const validCharactersRegex = /^[\d\+\-\*\/\.\s]+$/;
+    return containsValidCharacters(expression) &&
+           !containsConsecutiveOperators(expression) &&
+           !endsWithOperator(expression);
+}
 
-    // Verificar caracteres válidos
-    if (!validCharactersRegex.test(expression)) {
-        return false;
-    }
+// Verifica si la expresión contiene caracteres válidos
+function containsValidCharacters(expression) {
+    const validCharactersRegex = /^[\d+\-*/.\s]+$/;
+    return validCharactersRegex.test(expression);
+}
 
-    // Verificar que no haya dos operadores seguidos
-    if (/[\+\-\*\/]\s*[\+\-\*\/]/.test(expression)) {
-        return false;
-    }
+// Verifica si la expresión tiene dos operadores consecutivos
+function containsConsecutiveOperators(expression) {
+    const consecutiveOperatorsRegex = /[\+\-\*\/]{2,}/;
+    return consecutiveOperatorsRegex.test(expression);
+}
 
-    // Verificar que la expresión no termine con un operador
-    if (/[\+\-\*\/]\s*$/.test(expression)) {
-        return false;
-    }
-
-    return true;
+// Verifica si la expresión termina con un operador
+function endsWithOperator(expression) {
+    const endsWithOperatorRegex = /[\+\-\*\/]\s*$/;
+    return endsWithOperatorRegex.test(expression);
 }
