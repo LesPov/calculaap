@@ -3,21 +3,24 @@
 // Importar las funciones y módulos necesarios
 import * as operations from './operations.js';
 
-
 const calculator = {
+    // Elementos del DOM
     ansInput: null,
     calculationHistory: null,
     possibleResult: null,
 
+    // Inicialización de la calculadora
     init: function () {
+        // Obtener referencias a elementos del DOM
         this.ansInput = document.forms.calculator.ans;
         this.calculationHistory = document.getElementById('calculation-history');
         this.possibleResult = document.getElementById('possible-result');
 
+        // Asignar manejadores de eventos
         this.attachEventHandlers();
     },
 
-
+    
 
     attachEventHandlers: function () {
         const buttons = document.querySelectorAll('.buttons input[type="button"]');
@@ -27,60 +30,10 @@ const calculator = {
                 this.handleButtonClick(value);
             });
         });
-
-        this.ansInput.addEventListener('input', () => {
-            this.updatePossibleResult();
-        });
     },
 
 
-    // Actualizar el posible resultado
-    updatePossibleResult: function () {
-        const expression = this.ansInput.value;
-    
-        try {
-            const possibleResult = operations.evaluate(expression);
-            this.showPossibleResult(possibleResult);
-        } catch (error) {
-            // Verificar si la expresión comienza con un operador negativo
-            const startsWithNegativeOperator = /^-\d/.test(expression);
-    
-            if (startsWithNegativeOperator) {
-                // Si comienza con un operador negativo, intentar evaluar sin el signo negativo al inicio
-                const adjustedExpression = expression.replace(/^-/, '0-');
-                try {
-                    const possibleResult = operations.evaluate(adjustedExpression);
-                    this.showPossibleResult(possibleResult);
-                } catch (error) {
-                    this.hidePossibleResult();
-                }
-            } else {
-                this.hidePossibleResult();
-            }
-        }
-    },
-    
-
-    showPossibleResult: function (possibleResult) {
-        if (!isNaN(possibleResult)) {
-            const formattedResult = this.formatNumber(possibleResult);
-            this.possibleResult.textContent = `= ${formattedResult}`;
-            this.possibleResult.style.display = 'block';
-        } else {
-            this.hidePossibleResult();
-        }
-    },
-    formatNumber: function (number) {
-        // Implement your formatting logic here
-        return number.toLocaleString(); // Example: Use toLocaleString for basic formatting
-    },
-
-    hidePossibleResult: function () {
-        this.possibleResult.textContent = '';
-        this.possibleResult.style.display = 'none';
-    },
     // Manejo de clics en botones
-
     handleButtonClick: function (value) {
         switch (value) {
             case '=':
@@ -89,44 +42,53 @@ const calculator = {
             case 'C':
                 this.clearCalculator();
                 break;
+            // Puedes agregar más casos según las operaciones que necesites
             default:
                 this.updateExpression(value);
                 break;
         }
     },
+
     // Actualización de la expresión en la calculadora
+
+
     updateExpression: function (value) {
         const currentExpression = this.ansInput.value;
 
-        const lastCharIsOperator = /[\+\-\*\/]$/.test(currentExpression);
-        const newValueIsOperator = /[\+\-\*\/]/.test(value);
-
-        if (currentExpression === '' && value === '-') {
+        // Verificar si la expresión está vacía y el nuevo valor es un operador
+        if (currentExpression === '' && /[\+\-\*\/]/.test(value)) {
             // Permitir que el primer número sea negativo
             this.ansInput.value = value;
-        } else if (lastCharIsOperator && newValueIsOperator) {
-            // Reemplazar el operador anterior con el nuevo operador
-            this.ansInput.value = currentExpression.slice(0, -1) + value;
-        } else {
-            // Agregar el nuevo valor a la expresión
-            this.ansInput.value += value;
+            return;
         }
 
-        // Actualizar el posible resultado después de modificar la expresión
-        this.updatePossibleResult();
+        // Verificar si ya hay un operador al final de la expresión
+        const lastCharIsOperator = /[\+\-\*\/]$/.test(currentExpression);
+
+        // Verificar si el nuevo valor es un operador
+        const newValueIsOperator = /[\+\-\*\/]/.test(value);
+
+        // Verificar si hay dos operadores seguidos y el usuario seleccionó un nuevo operador
+        if (lastCharIsOperator && newValueIsOperator) {
+            // Reemplazar el operador anterior con el nuevo operador
+            this.ansInput.value = currentExpression.slice(0, -1) + value;
+            return;
+        }
+
+        // Agregar el nuevo valor a la expresión
+        this.ansInput.value += value;
     },
 
 
 
-
     // Evaluación de la expresión
-    // Evaluación de la expresión
-    evaluateExpression: function () {
+     // Evaluación de la expresión
+     evaluateExpression: function () {
         const expression = this.ansInput.value;
-
+    
         // Manejar el caso especial de números negativos al inicio
         const adjustedExpression = expression.replace(/^-/, '0-');
-
+    
         try {
             const result = operations.evaluate(adjustedExpression);
 
@@ -137,12 +99,10 @@ const calculator = {
         } catch (error) {
             console.error('Error al evaluar la expresión:', error.message);
         }
-        this.updatePossibleResult(); // Actualiza el posible resultado al modificar la expresión
-
     },
 
-
-
+    
+   
     // Mostrar la expresión y el resultado en el historial
     showInHistory: function (expression, result) {
         const historyEntry = document.createElement('div');
@@ -169,16 +129,13 @@ const calculator = {
     // Limpiar la calculadora
     clearCalculator: function () {
         this.ansInput.value = '';
-        this.resultcontainer.textContent = ''; // Limpiar el posible resultado al limpiar la calculadora
+        // Puedes limpiar otros elementos, como el historial de cálculos, si es necesario
     },
 
     // Mostrar el resultado
     displayResult: function (result) {
-        // Formatear el resultado para que se muestre correctamente con números negativos
-        const formattedResult = this.formatNumber(result);
-        this.ansInput.value = formattedResult;
+        this.ansInput.value = result;
     },
-    // Actualizar el posible resultado
 
 };
 

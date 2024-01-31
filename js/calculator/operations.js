@@ -78,4 +78,3 @@ function isValidExpression(expression) {
 
     return true;
 }
-
