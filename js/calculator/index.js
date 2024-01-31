@@ -82,7 +82,8 @@ const calculator = {
 
 
     // Evaluación de la expresión
-    evaluateExpression: function () {
+     // Evaluación de la expresión
+     evaluateExpression: function () {
         const expression = this.ansInput.value;
     
         // Manejar el caso especial de números negativos al inicio
@@ -90,12 +91,40 @@ const calculator = {
     
         try {
             const result = operations.evaluate(adjustedExpression);
+
+            // Mostrar la expresión y el resultado en el historial
+            this.showInHistory(expression, result);
+
             this.displayResult(result);
         } catch (error) {
             console.error('Error al evaluar la expresión:', error.message);
         }
     },
+
     
+   
+    // Mostrar la expresión y el resultado en el historial
+    showInHistory: function (expression, result) {
+        const historyEntry = document.createElement('div');
+        historyEntry.classList.add('calculation-entry');
+
+        // Crear elementos para la expresión y el resultado
+        const expressionElement = document.createElement('div');
+        const resultElement = document.createElement('div');
+
+        expressionElement.classList.add('calculation-operation');
+        resultElement.classList.add('calculation-result');
+
+        // Asignar valores
+        expressionElement.textContent = `${expression}`;
+        resultElement.textContent = `= ${result}`;
+
+        // Agregar al historial al principio (antes de las existentes)
+        historyEntry.appendChild(expressionElement);
+        historyEntry.appendChild(resultElement);
+        this.calculationHistory.insertBefore(historyEntry, this.calculationHistory.firstChild);
+    },
+
 
     // Limpiar la calculadora
     clearCalculator: function () {
