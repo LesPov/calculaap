@@ -44,6 +44,7 @@ const calculator = {
     },
 
     // Actualiza la expresión en la calculadora según el botón presionado
+    // Actualiza la expresión en la calculadora según el botón presionado
     updateExpression: function (value) {
         const currentExpression = this.ansInput.value;
 
@@ -54,8 +55,10 @@ const calculator = {
         } else {
             this.appendValueToExpression(value);
         }
-    },
 
+        // Formatear la expresión para mostrar comas en los números
+        this.formatExpression();
+    },
     // Verifica si se debe reemplazar el último operador en la expresión
     shouldReplaceOperator: function (expression, value) {
         const lastCharIsOperator = /[\+\-\*\/]$/.test(expression);
@@ -85,22 +88,24 @@ const calculator = {
 
     // Evalúa la expresión y muestra el resultado en la calculadora
     evaluateExpression: function () {
-        const expression = this.ansInput.value;
-    
-        // Manejar el caso especial de números negativos al inicio
-        const adjustedExpression = expression.replace(/^-/, '0-');
-    
+        let expression = this.ansInput.value;
+
+        // Remover comas solo de números, no del signo negativo
+        expression = expression.replace(/(\d),(\d)/g, '$1$2');
+
         try {
-            const result = operations.evaluate(adjustedExpression);
+            const result = operations.evaluate(expression);
 
             // Mostrar la expresión y el resultado en el historial
             this.showInHistory(expression, result);
 
-            this.displayResult(result);
+            // Formatear el resultado antes de mostrarlo
+            this.displayResultWithFormat(result);
         } catch (error) {
             console.error('Error al evaluar la expresión:', error.message);
         }
     },
+
 
     // Muestra la expresión y el resultado en el historial de cálculos
     showInHistory: function (expression, result) {
@@ -114,9 +119,12 @@ const calculator = {
         expressionElement.classList.add('calculation-operation');
         resultElement.classList.add('calculation-result');
 
+        // Formatear el resultado con comas
+        const formattedResult = parseFloat(result).toLocaleString('en-US');
+
         // Asignar valores
         expressionElement.textContent = `${expression}`;
-        resultElement.textContent = `= ${result}`;
+        resultElement.textContent = `= ${formattedResult}`;
 
         // Agregar al historial al principio (antes de las existentes)
         historyEntry.appendChild(expressionElement);
@@ -130,6 +138,56 @@ const calculator = {
         // Puedes limpiar otros elementos, como el historial de cálculos, si es necesario
     },
 
+    // Formatea la expresión para mostrar comas en los números
+    formatExpression: function () {
+        let expression = this.ansInput.value;
+
+        // Remover comas existentes
+        expression = expression.replace(/,/g, '');
+
+        // Separar la expresión en operandos y operadores
+        const tokens = expression.match(/(\d+|\+|\-|\*|\/)/g);
+
+        // Formatear los números en la expresión
+        const formattedExpression = tokens.map(token => {
+            if (/^\d+$/.test(token)) {
+                // Formatear el número con comas
+                return parseFloat(token).toLocaleString('en-US');
+            }
+            return token;
+        }).join('');
+
+        // Actualizar el valor del input con la expresión formateada
+        this.ansInput.value = formattedExpression;
+    },
+
+    // Evalúa la expresión y muestra el resultado en la calculadora
+    // Evalúa la expresión y muestra el resultado en la calculadora
+    evaluateExpression: function () {
+        let expression = this.ansInput.value;
+
+        // Remover comas de los números antes de evaluar
+        const expressionWithoutCommas = expression.replace(/,/g, '');
+
+        try {
+            const result = operations.evaluate(expressionWithoutCommas);
+
+            // Mostrar la expresión y el resultado en el historial
+            this.showInHistory(expression, result);
+
+            // Formatear el resultado antes de mostrarlo
+            this.displayResultWithFormat(result);
+        } catch (error) {
+            console.error('Error al evaluar la expresión:', error.message);
+        }
+    },
+
+    // Muestra el resultado en la calculadora con formato
+    displayResultWithFormat: function (result) {
+        // Formatear el resultado con comas
+        const formattedResult = parseFloat(result).toLocaleString('en-US');
+        this.ansInput.value = formattedResult;
+    },
     // Muestra el resultado en la calculadora
     displayResult: function (result) {
         this.ansInput.value = result;
