@@ -19,14 +19,19 @@ export function divide(a, b) {
 }
 
 // Evaluación de expresión
+
+// Evaluación de expresión
 export function evaluate(expression) {
     // Validar la expresión antes de evaluar
     if (!isValidExpression(expression)) {
         throw new Error('Expresión no válida');
     }
 
+    // Remover comas solo de números, no del signo negativo
+    expression = expression.replace(/(\d),(\d)/g, '$1$2');
+
     // Dividir la expresión en operandos y operadores
-    const tokens = expression.match(/(\d+|\+|\-|\*|\/)/g);
+    const tokens = expression.match(/(\d+\.?\d*|\+|\-|\*|\/)/g);
 
     // Realizar la evaluación
     let result = parseFloat(tokens[0]);
@@ -38,7 +43,6 @@ export function evaluate(expression) {
 
     return result;
 }
-
 // Realizar la operación correspondiente
 function operate(leftOperand, operator, rightOperand) {
     const operations = {
@@ -56,16 +60,18 @@ function operate(leftOperand, operator, rightOperand) {
 }
 
 
-// Validación de expresión// Validación de expresión
+// Validación de expresión// Validación de expresión// Validación de expresión
 function isValidExpression(expression) {
     return containsValidCharacters(expression) &&
-           !containsConsecutiveOperators(expression) &&
-           !endsWithOperator(expression);
+        !containsConsecutiveOperators(expression) &&
+        !endsWithOperator(expression) &&
+        !containsMultipleDecimals(expression) &&
+        !startsWithDecimal(expression);
 }
 
-// Verifica si la expresión contiene caracteres válidos
+// Verifica si la expresión contiene caracteres válidos, incluyendo comas
 function containsValidCharacters(expression) {
-    const validCharactersRegex = /^[\d+\-*/.\s]+$/;
+    const validCharactersRegex = /^[\d+\-*/.,\s]+$/;
     return validCharactersRegex.test(expression);
 }
 
@@ -79,4 +85,14 @@ function containsConsecutiveOperators(expression) {
 function endsWithOperator(expression) {
     const endsWithOperatorRegex = /[\+\-\*\/]\s*$/;
     return endsWithOperatorRegex.test(expression);
+}
+// Verifica si la expresión contiene múltiples puntos decimales en un número
+export function containsMultipleDecimals(expression) {
+    const decimalRegex = /\.\d*\./;
+    return decimalRegex.test(expression);
+}
+// Verifica si la expresión comienza con un punto decimal
+function startsWithDecimal(expression) {
+    const startsWithDecimalRegex = /^\./;
+    return startsWithDecimalRegex.test(expression);
 }
