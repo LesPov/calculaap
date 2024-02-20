@@ -1,5 +1,6 @@
 // Importar las funciones y módulos necesarios
 import * as operations from './operations.js';
+import history from './history.js'; // Importar el módulo del historial
 
 // Objeto calculadora que maneja la lógica de la calculadora
 const calculator = {
@@ -8,6 +9,8 @@ const calculator = {
     calculationHistory: null,
     possibleResult: null,
     clearButtonClickCount: 0,
+
+
 
     // Inicialización de la calculadora
     init: function () {
@@ -19,7 +22,7 @@ const calculator = {
 
         // Asignar manejadores de eventos
         this.attachEventHandlers();
-        
+
     },
 
     // Asigna manejadores de eventos a los botones
@@ -62,50 +65,50 @@ const calculator = {
             this.updatePossibleResult();
         }
     },
-// Formatea la expresión después de presionar el botón de retroceso
-formatExpressionAfterBackspace: function (expression) {
-    if (expression === '') {
-        return '';
-    }
-
-    const expressionWithoutCommas = this.removeCommas(expression);
-    const expressionWithPlaceholder = this.replaceDecimalWithPlaceholder(expressionWithoutCommas);
-    const tokens = this.tokenizeExpression(expressionWithPlaceholder);
-    const formattedExpression = this.formatNumbersInExpression(tokens);
-
-    return formattedExpression;
-},
-
-// Remueve comas existentes en la expresión
-removeCommas: function (expression) {
-    return expression.replace(/,/g, '');
-},
-
-// Reemplaza los puntos decimales con una marca temporal
-replaceDecimalWithPlaceholder: function (expression) {
-    return expression.replace(/\./g, '#');
-},
-
-// Separa la expresión en operandos y operadores
-tokenizeExpression: function (expression) {
-    return expression.match(/(\d+|\+|\-|\*|\/|#)/g);
-},
-
-// Formatea los números en la expresión
-formatNumbersInExpression: function (tokens) {
-    let formattedExpression = '';
-    for (let i = 0; i < tokens.length; i++) {
-        const token = tokens[i];
-        if (/^\d+$/.test(token)) {
-            formattedExpression += this.formatNumber(token);
-        } else if (token === '#') {
-            formattedExpression += '.';
-        } else {
-            formattedExpression += token;
+    // Formatea la expresión después de presionar el botón de retroceso
+    formatExpressionAfterBackspace: function (expression) {
+        if (expression === '') {
+            return '';
         }
-    }
-    return formattedExpression;
-},
+
+        const expressionWithoutCommas = this.removeCommas(expression);
+        const expressionWithPlaceholder = this.replaceDecimalWithPlaceholder(expressionWithoutCommas);
+        const tokens = this.tokenizeExpression(expressionWithPlaceholder);
+        const formattedExpression = this.formatNumbersInExpression(tokens);
+
+        return formattedExpression;
+    },
+
+    // Remueve comas existentes en la expresión
+    removeCommas: function (expression) {
+        return expression.replace(/,/g, '');
+    },
+
+    // Reemplaza los puntos decimales con una marca temporal
+    replaceDecimalWithPlaceholder: function (expression) {
+        return expression.replace(/\./g, '#');
+    },
+
+    // Separa la expresión en operandos y operadores
+    tokenizeExpression: function (expression) {
+        return expression.match(/(\d+|\+|\-|\*|\/|#)/g);
+    },
+
+    // Formatea los números en la expresión
+    formatNumbersInExpression: function (tokens) {
+        let formattedExpression = '';
+        for (let i = 0; i < tokens.length; i++) {
+            const token = tokens[i];
+            if (/^\d+$/.test(token)) {
+                formattedExpression += this.formatNumber(token);
+            } else if (token === '#') {
+                formattedExpression += '.';
+            } else {
+                formattedExpression += token;
+            }
+        }
+        return formattedExpression;
+    },
 
     // ------------------------------------------------------------  Posible Resultado ------------------------------------------------------------
 
@@ -213,7 +216,7 @@ formatNumbersInExpression: function (tokens) {
         action();
     },
 
-    // Maneja el clic en el botón "="
+    // En la función evaluateExpression
     evaluateExpression: function () {
         let expression = this.ansInput.value;
         const expressionWithoutCommas = expression.replace(/,/g, '');
@@ -227,13 +230,15 @@ formatNumbersInExpression: function (tokens) {
                 result = operations.evaluate(expressionWithoutCommas);
             }
 
-            this.showInHistory(expression, result);
+            const formattedResult = this.formatNumber(result);
+            history.addEntry(expression, formattedResult); // Agregar entrada al historial
             this.displayResultWithFormat(result);
             this.updatePossibleResult();
         } catch (error) {
             console.error('Error al evaluar la expresión:', error.message);
         }
     },
+
 
     // Maneja el clic en el botón "C"
     handleClearButtonClick: function () {
@@ -341,40 +346,8 @@ formatNumbersInExpression: function (tokens) {
         this.ansInput.value += value;
     },
 
-    // ------------------------------ Lógica relacionada con la evaluación y el historial ------------------------------
+    // ------------------------------ Lógica relacionada con limpiar la calculadora ------------------------------
 
-
-
-    // Verificar si la expresión comienza con un operador negativo
-    startsWithNegativeOperator: function (expression) {
-        return /^-\d/.test(expression);
-    },
-
-
-    // Muestra la expresión y el resultado en el historial de cálculos
-    showInHistory: function (expression, result) {
-        const historyEntry = document.createElement('div');
-        historyEntry.classList.add('calculation-entry');
-
-        // Crear elementos para la expresión y el resultado
-        const expressionElement = document.createElement('div');
-        const resultElement = document.createElement('div');
-
-        expressionElement.classList.add('calculation-operation');
-        resultElement.classList.add('calculation-result');
-
-        // Formatear el resultado con comas
-        const formattedResult = parseFloat(result).toLocaleString('en-US');
-
-        // Asignar valores
-        expressionElement.textContent = `${expression}`;
-        resultElement.textContent = `= ${formattedResult}`;
-
-        // Agregar al historial al principio (antes de las existentes)
-        historyEntry.appendChild(expressionElement);
-        historyEntry.appendChild(resultElement);
-        this.calculationHistory.insertBefore(historyEntry, this.calculationHistory.firstChild);
-    },
 
     clearCalculator: function () {
         // Incrementa el contador de clics
@@ -382,7 +355,7 @@ formatNumbersInExpression: function (tokens) {
 
         // Borra el historial si se han presionado dos veces el botón "C"
         if (this.clearButtonClickCount === 2) {
-            this.clearHistory();
+            history.clearHistory();
         } else {
             // Lógica actual de borrar resultado y posible resultado
             this.ansInput.value = '';
@@ -390,13 +363,7 @@ formatNumbersInExpression: function (tokens) {
         }
     },
 
-    clearHistory: function () {
-        // Restablece el contador a cero
-        this.clearButtonClickCount = 0;
 
-        // Borra el historial
-        this.calculationHistory.innerHTML = '';
-    },
 
     // ------------------------------ Lógica relacionada con el formato de la expresión ------------------------------
 
@@ -425,22 +392,6 @@ formatNumbersInExpression: function (tokens) {
     // Separa la expresión en operandos y operadores
     tokenizeExpression: function (expression) {
         return expression.match(/(\d+|\+|\-|\*|\/|#)/g);
-    },
-
-    // Formatea los números en la expresión
-    formatNumbersInExpression: function (tokens) {
-        let formattedExpression = '';
-        for (let i = 0; i < tokens.length; i++) {
-            const token = tokens[i];
-            if (/^\d+$/.test(token)) {
-                formattedExpression += this.formatNumber(token);
-            } else if (token === '#') {
-                formattedExpression += '.';
-            } else {
-                formattedExpression += token;
-            }
-        }
-        return formattedExpression;
     },
 
 
