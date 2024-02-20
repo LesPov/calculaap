@@ -60,14 +60,20 @@ function operate(leftOperand, operator, rightOperand) {
 }
 
 
-// Validación de expresión// Validación de expresión// Validación de expresión
 function isValidExpression(expression) {
     return containsValidCharacters(expression) &&
         !containsConsecutiveOperators(expression) &&
         !endsWithOperator(expression) &&
-        !containsMultipleDecimals(expression) &&
-        !startsWithDecimal(expression);
+        !startsWithDecimal(expression) &&
+        !containsMultipleDecimals(expression);
 }
+
+
+export function containsMultipleDecimals(expression) {
+    const decimalRegex = /\.\d*\./;
+    return decimalRegex.test(expression);
+}
+
 
 // Verifica si la expresión contiene caracteres válidos, incluyendo comas
 function containsValidCharacters(expression) {
@@ -86,13 +92,9 @@ function endsWithOperator(expression) {
     const endsWithOperatorRegex = /[\+\-\*\/]\s*$/;
     return endsWithOperatorRegex.test(expression);
 }
-// Verifica si la expresión contiene múltiples puntos decimales en un número
-export function containsMultipleDecimals(expression) {
-    const decimalRegex = /\.\d*\./;
-    return decimalRegex.test(expression);
-}
+
 // Verifica si la expresión comienza con un punto decimal
 function startsWithDecimal(expression) {
-    const startsWithDecimalRegex = /^\./;
+    const startsWithDecimalRegex = /^[+\-*/]\./;
     return startsWithDecimalRegex.test(expression);
 }
