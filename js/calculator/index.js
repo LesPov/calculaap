@@ -34,28 +34,36 @@ const calculator = {
     },
 
     // Agrega la lógica para manejar el clic en el botón decimal
-    // Agrega la lógica para manejar el clic en el botón decimal
     handleDecimalButtonClick: function () {
         const currentValue = this.ansInput.value;
 
-        // Verificar si ya hay un operador en la expresión
-        if (currentValue.includes('+') || currentValue.includes('-') || currentValue.includes('*') || currentValue.includes('/')) {
-            // Verificar si el último número ya tiene un punto decimal
-            const lastNumber = currentValue.split(/[\+\-\*\/]/).pop();
-            if (!lastNumber.includes('.')) {
-                // Si no tiene un punto decimal, agregar el punto decimal al final
-                this.ansInput.value += '.';
-            }
+        if (this.containsOperator(currentValue)) {
+            this.handleDecimalWithOperator(currentValue);
         } else {
-            // Si no hay operador, agregar el punto decimal al final
-            if (!currentValue.includes('.')) {
-                this.ansInput.value += '.';
-            }
+            this.handleDecimalWithoutOperator(currentValue);
         }
     },
 
+    // Verifica si la expresión contiene un operador
+    containsOperator: function (expression) {
+        return expression.includes('+') || expression.includes('-') || expression.includes('*') || expression.includes('/');
+    },
 
+    // Maneja el clic en el botón decimal cuando hay un operador en la expresión
+    handleDecimalWithOperator: function (currentValue) {
+        const lastNumber = currentValue.split(/[\+\-\*\/]/).pop();
 
+        if (!lastNumber.includes('.')) {
+            this.ansInput.value += '.';
+        }
+    },
+
+    // Maneja el clic en el botón decimal cuando no hay un operador en la expresión
+    handleDecimalWithoutOperator: function (currentValue) {
+        if (!currentValue.includes('.')) {
+            this.ansInput.value += '.';
+        }
+    },
 
 
     // Maneja clics en botones
@@ -76,23 +84,32 @@ const calculator = {
         const currentExpression = this.ansInput.value;
 
         if (value === '.') {
-            // Si el valor es un punto decimal, manejarlo específicamente
             this.handleDecimalButtonClick();
         } else if (this.shouldReplaceOperator(currentExpression, value)) {
             this.replaceLastOperator(currentExpression, value);
         } else if (this.shouldAllowNegativeNumber(currentExpression, value)) {
             this.allowNegativeNumber(value);
         } else {
-            if (value === '0' && currentExpression.endsWith('0')) {
-                // Evitar agregar ceros adicionales al final
-                return;
-            }
-            this.appendValueToExpression(value);
+            this.handleNonSpecialValues(value, currentExpression);
         }
 
-        // Formatear la expresión para mostrar comas en los números
         this.formatExpression();
     },
+
+    // Maneja los valores que no son especiales (ni punto decimal, ni reemplazo de operador, ni número negativo)
+    handleNonSpecialValues: function (value, currentExpression) {
+        if (this.shouldAvoidAddingZero(value, currentExpression)) {
+            return;
+        }
+
+        this.appendValueToExpression(value);
+    },
+
+    // Verifica si se debe evitar agregar ceros adicionales al final
+    shouldAvoidAddingZero: function (value, currentExpression) {
+        return value === '0' && currentExpression.endsWith('0');
+    },
+
 
     // Verifica si se debe reemplazar el último operador en la expresión
     shouldReplaceOperator: function (expression, value) {
@@ -141,8 +158,6 @@ const calculator = {
         }
     },
 
-
-
     // Muestra la expresión y el resultado en el historial de cálculos
     showInHistory: function (expression, result) {
         const historyEntry = document.createElement('div');
@@ -175,56 +190,53 @@ const calculator = {
     },
 
     // Formatea la expresión para mostrar comas en los números
-    // Formatea la expresión para mostrar comas en los números
     formatExpression: function () {
         let expression = this.ansInput.value;
+        expression = this.removeCommas(expression);
+        expression = this.replaceDecimalWithPlaceholder(expression);
 
-        // Remover comas existentes
-        expression = expression.replace(/,/g, '');
+        const tokens = this.tokenizeExpression(expression);
+        const formattedExpression = this.formatNumbersInExpression(tokens);
 
-        // Reemplazar los puntos decimales con una marca temporal
-        expression = expression.replace(/\./g, '#');
-
-        // Separar la expresión en operandos y operadores
-        const tokens = expression.match(/(\d+|\+|\-|\*|\/|#)/g);
-
-        // Formatear los números en la expresión
-        const formattedExpression = tokens.map(token => {
-            if (/^\d+$/.test(token)) {
-                // Formatear el número con comas
-                return parseFloat(token).toLocaleString('en-US');
-            } else if (token === '#') {
-                // Mantener el punto decimal en su lugar
-                return '.';
-            }
-            return token;
-        }).join('');
-
-        // Actualizar el valor del input con la expresión formateada
         this.ansInput.value = formattedExpression;
     },
 
-
-    // Evalúa la expresión y muestra el resultado en la calculadora
-    // Evalúa la expresión y muestra el resultado en la calculadora
-    evaluateExpression: function () {
-        let expression = this.ansInput.value;
-
-        // Remover comas de los números antes de evaluar
-        const expressionWithoutCommas = expression.replace(/,/g, '');
-
-        try {
-            const result = operations.evaluate(expressionWithoutCommas);
-
-            // Mostrar la expresión y el resultado en el historial
-            this.showInHistory(expression, result);
-
-            // Formatear el resultado antes de mostrarlo
-            this.displayResultWithFormat(result);
-        } catch (error) {
-            console.error('Error al evaluar la expresión:', error.message);
-        }
+    // Remueve comas existentes en la expresión
+    removeCommas: function (expression) {
+        return expression.replace(/,/g, '');
     },
+
+    // Reemplaza los puntos decimales con una marca temporal
+    replaceDecimalWithPlaceholder: function (expression) {
+        return expression.replace(/\./g, '#');
+    },
+
+    // Separa la expresión en operandos y operadores
+    tokenizeExpression: function (expression) {
+        return expression.match(/(\d+|\+|\-|\*|\/|#)/g);
+    },
+
+    // Formatea los números en la expresión
+    formatNumbersInExpression: function (tokens) {
+        let formattedExpression = '';
+        for (let i = 0; i < tokens.length; i++) {
+            const token = tokens[i];
+            if (/^\d+$/.test(token)) {
+                formattedExpression += this.formatNumber(token);
+            } else if (token === '#') {
+                formattedExpression += '.';
+            } else {
+                formattedExpression += token;
+            }
+        }
+        return formattedExpression;
+    },
+
+    // Formatea un número con comas
+    formatNumber: function (number) {
+        return parseFloat(number).toLocaleString('en-US');
+    },
+
 
     // Muestra el resultado en la calculadora con formato
     displayResultWithFormat: function (result) {
