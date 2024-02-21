@@ -1,6 +1,7 @@
 // Importar las funciones y módulos necesarios
 import * as operations from './operations.js';
 import history from './history.js'; // Importar el módulo del historial
+import backspace from './backspace.js';
 
 // Objeto calculadora que maneja la lógica de la calculadora
 const calculator = {
@@ -33,82 +34,18 @@ const calculator = {
                 const value = event.target.value;
                 this.handleButtonClick(value);
                 this.updatePossibleResult();
+
             });
         });
-
+    
         const decimalButton = document.getElementById('decimal-button');
         decimalButton.addEventListener('click', () => this.handleDecimalButtonClick());
-
+    
         // Agrega el botón de retroceso
-        this.backspaceButton.addEventListener('click', () => this.handleBackspaceButtonClick());
+        this.backspaceButton.addEventListener('click', () => backspace.handleBackspaceButtonClick(this.ansInput, this.updatePossibleResult.bind(this), this.formatNumbersInExpression.bind(this)));
     },
 
-    // Maneja el clic en el botón de retroceso
-    handleBackspaceButtonClick: function () {
-        let currentValue = this.ansInput.value;
 
-        // Verifica si hay algo que borrar
-        if (currentValue.length > 0) {
-            // Elimina el último carácter de la expresión
-            currentValue = currentValue.slice(0, -1);
-
-            // Elimina todas las comas de la expresión actual
-            const expressionWithoutCommas = currentValue.replace(/,/g, '');
-
-            // Formatea la expresión eliminando comas y luego la vuelve a formatear con las comas en la posición correcta
-            const formattedExpression = this.formatExpressionAfterBackspace(expressionWithoutCommas);
-
-            // Asigna el valor formateado de nuevo al campo de entrada
-            this.ansInput.value = formattedExpression;
-
-            // Actualiza el posible resultado
-            this.updatePossibleResult();
-        }
-    },
-    // Formatea la expresión después de presionar el botón de retroceso
-    formatExpressionAfterBackspace: function (expression) {
-        if (expression === '') {
-            return '';
-        }
-
-        const expressionWithoutCommas = this.removeCommas(expression);
-        const expressionWithPlaceholder = this.replaceDecimalWithPlaceholder(expressionWithoutCommas);
-        const tokens = this.tokenizeExpression(expressionWithPlaceholder);
-        const formattedExpression = this.formatNumbersInExpression(tokens);
-
-        return formattedExpression;
-    },
-
-    // Remueve comas existentes en la expresión
-    removeCommas: function (expression) {
-        return expression.replace(/,/g, '');
-    },
-
-    // Reemplaza los puntos decimales con una marca temporal
-    replaceDecimalWithPlaceholder: function (expression) {
-        return expression.replace(/\./g, '#');
-    },
-
-    // Separa la expresión en operandos y operadores
-    tokenizeExpression: function (expression) {
-        return expression.match(/(\d+|\+|\-|\*|\/|#)/g);
-    },
-
-    // Formatea los números en la expresión
-    formatNumbersInExpression: function (tokens) {
-        let formattedExpression = '';
-        for (let i = 0; i < tokens.length; i++) {
-            const token = tokens[i];
-            if (/^\d+$/.test(token)) {
-                formattedExpression += this.formatNumber(token);
-            } else if (token === '#') {
-                formattedExpression += '.';
-            } else {
-                formattedExpression += token;
-            }
-        }
-        return formattedExpression;
-    },
 
     // ------------------------------------------------------------  Posible Resultado ------------------------------------------------------------
 
@@ -315,6 +252,62 @@ const calculator = {
 
     /// ------------------------------ Lógica relacionada con el formato ------------------------------
 
+    // Formatea los números en la expresión
+    formatNumbersInExpression: function (tokens) {
+        let formattedExpression = '';
+        for (let i = 0; i < tokens.length; i++) {
+            const token = tokens[i];
+            if (/^\d+$/.test(token)) {
+                formattedExpression += this.formatNumber(token);
+            } else if (token === '#') {
+                formattedExpression += '.';
+            } else {
+                formattedExpression += token;
+            }
+        }
+        return formattedExpression;
+    },
+    
+    // Formatea la expresión para mostrar comas en los números
+    formatExpression: function () {
+        let expression = this.ansInput.value;
+        expression = this.removeCommas(expression);
+        expression = this.replaceDecimalWithPlaceholder(expression);
+
+        const tokens = this.tokenizeExpression(expression);
+        const formattedExpression = this.formatNumbersInExpression(tokens);
+
+        this.ansInput.value = formattedExpression;
+    },
+
+    // Remueve comas existentes en la expresión
+    removeCommas: function (expression) {
+        return expression.replace(/,/g, '');
+    },
+
+    // Reemplaza los puntos decimales con una marca temporal
+    replaceDecimalWithPlaceholder: function (expression) {
+        return expression.replace(/\./g, '#');
+    },
+
+    // Separa la expresión en operandos y operadores
+    tokenizeExpression: function (expression) {
+        return expression.match(/(\d+|\+|\-|\*|\/|#)/g);
+    },
+
+
+
+    // Muestra el resultado en la calculadora con formato
+    displayResultWithFormat: function (result) {
+        // Formatear el resultado con comas
+        const formattedResult = parseFloat(result).toLocaleString('en-US');
+        this.ansInput.value = formattedResult;
+    },
+    displayResult: function (result) {
+        // Formatear el resultado para que se muestre correctamente con números negativos
+        const formattedResult = this.formatNumber(result);
+        this.ansInput.value = formattedResult;
+    },
 
 
 
@@ -365,48 +358,6 @@ const calculator = {
 
 
 
-    // ------------------------------ Lógica relacionada con el formato de la expresión ------------------------------
-
-    // Formatea la expresión para mostrar comas en los números
-    formatExpression: function () {
-        let expression = this.ansInput.value;
-        expression = this.removeCommas(expression);
-        expression = this.replaceDecimalWithPlaceholder(expression);
-
-        const tokens = this.tokenizeExpression(expression);
-        const formattedExpression = this.formatNumbersInExpression(tokens);
-
-        this.ansInput.value = formattedExpression;
-    },
-
-    // Remueve comas existentes en la expresión
-    removeCommas: function (expression) {
-        return expression.replace(/,/g, '');
-    },
-
-    // Reemplaza los puntos decimales con una marca temporal
-    replaceDecimalWithPlaceholder: function (expression) {
-        return expression.replace(/\./g, '#');
-    },
-
-    // Separa la expresión en operandos y operadores
-    tokenizeExpression: function (expression) {
-        return expression.match(/(\d+|\+|\-|\*|\/|#)/g);
-    },
-
-
-
-    // Muestra el resultado en la calculadora con formato
-    displayResultWithFormat: function (result) {
-        // Formatear el resultado con comas
-        const formattedResult = parseFloat(result).toLocaleString('en-US');
-        this.ansInput.value = formattedResult;
-    },
-    displayResult: function (result) {
-        // Formatear el resultado para que se muestre correctamente con números negativos
-        const formattedResult = this.formatNumber(result);
-        this.ansInput.value = formattedResult;
-    },
 
 
 };
