@@ -41,7 +41,7 @@ export function evaluate(expression) {
         result = operate(result, operator, operand);
     }
 
-    return result;
+    return eval(expression);
 }
 // Realizar la operación correspondiente
 function operate(leftOperand, operator, rightOperand) {

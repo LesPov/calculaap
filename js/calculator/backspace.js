@@ -1,6 +1,6 @@
 const backspace = {
-      // Maneja el clic en el botón de retroceso
-      handleBackspaceButtonClick: function (ansInput, updatePossibleResult, formatNumbersInExpression) {
+    // Maneja el clic en el botón de retroceso
+    handleBackspaceButtonClick: function (ansInput, updatePossibleResult, formatNumbersInExpression) {
         let currentValue = ansInput.value;
 
         // Verifica si hay algo que borrar

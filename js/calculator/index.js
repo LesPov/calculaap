@@ -94,11 +94,7 @@ const calculator = {
         this.possibleResult.style.display = 'none';
     },
 
-    // Formatea un número con comas
-    formatNumber: function (number) {
-        return parseFloat(number).toLocaleString('en-US');
-    },
-
+    
     // Verifica si la expresión comienza con un operador negativo
     startsWithNegativeOperator: function (expression) {
         return /^-\d/.test(expression);
@@ -234,7 +230,6 @@ const calculator = {
     },
 
     // Verifica si se debe agregar ceros adicionales al final
-    // Verifica si se debe agregar ceros adicionales al final
     shouldAppendZero: function (value, currentExpression) {
         return value === '0' && !currentExpression.includes('.');
     },
@@ -267,7 +262,11 @@ const calculator = {
         }
         return formattedExpression;
     },
-    
+    // Formatea un número con comas
+    formatNumber: function (number) {
+        return parseFloat(number).toLocaleString('en-US');
+    },
+
     // Formatea la expresión para mostrar comas en los números
     formatExpression: function () {
         let expression = this.ansInput.value;
