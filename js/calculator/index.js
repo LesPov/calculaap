@@ -37,10 +37,10 @@ const calculator = {
 
             });
         });
-    
+
         const decimalButton = document.getElementById('decimal-button');
         decimalButton.addEventListener('click', () => this.handleDecimalButtonClick());
-    
+
         // Agrega el botón de retroceso
         this.backspaceButton.addEventListener('click', () => backspace.handleBackspaceButtonClick(this.ansInput, this.updatePossibleResult.bind(this), this.formatNumbersInExpression.bind(this)));
     },
@@ -55,8 +55,13 @@ const calculator = {
         const expression = this.ansInput.value;
 
         try {
-            const possibleResult = this.evaluateExpressionWithNegativeHandling(expression);
-            this.showPossibleResult(possibleResult);
+            // Verifica si la expresión contiene algún operador
+            if (this.containsOperator(expression)) {
+                const possibleResult = this.evaluateExpressionWithNegativeHandling(expression);
+                this.showPossibleResult(possibleResult);
+            } else {
+                this.hidePossibleResult();
+            }
         } catch (error) {
             this.hidePossibleResult();
         }
@@ -94,7 +99,7 @@ const calculator = {
         this.possibleResult.style.display = 'none';
     },
 
-    
+
     // Verifica si la expresión comienza con un operador negativo
     startsWithNegativeOperator: function (expression) {
         return /^-\d/.test(expression);
@@ -135,7 +140,6 @@ const calculator = {
         }
     },
 
-
     // Maneja clics en botones
     handleButtonClick: function (value) {
         const buttonActions = {
@@ -146,6 +150,12 @@ const calculator = {
         };
 
         const action = buttonActions[value] || buttonActions.default;
+
+        // Llama a updatePossibleResult solo cuando se trata de una operación
+        if (/[\+\-\*\/=]/.test(value)) {
+            this.updatePossibleResult();
+        }
+
         action();
     },
 
